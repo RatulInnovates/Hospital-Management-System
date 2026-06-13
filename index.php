@@ -1,0 +1,390 @@
+<?php
+// Serve the shell — PHP session just passes login state
+session_start();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azure Sanctuary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="toast-container"></div>
+
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <aside id="app-sidebar" class="sidebar d-none">
+      <div class="sidebar-logo">
+        <h2 class="brand-name">Azure Sanctuary</h2>
+      </div>
+      <nav id="nav-menu" class="nav-menu"></nav>
+      <div class="sidebar-bottom">
+        <div id="user-info" class="flex items-center gap-4 mb-4" style="padding: 0 16px;"></div>
+        <button id="btn-emergency-nav" class="btn btn-danger w-full d-none">Emergency Alert</button>
+        <button id="btn-logout" class="btn btn-secondary w-full" style="color:white; border-color:white;">Logout</button>
+      </div>
+    </aside>
+
+    <main id="app-main" class="main-content w-full" style="margin-left: 0;">
+      <header id="app-header" class="top-header d-none">
+        <h2 id="page-title" class="page-title">Dashboard</h2>
+        <div class="header-actions">
+          <span>🔔</span>
+          <div id="header-avatar" class="avatar"></div>
+        </div>
+      </header>
+
+      <div class="content-area">
+
+        <!-- LOGIN -->
+        <section id="view-login" class="view--active">
+          <div class="auth-layout">
+            <div class="auth-left">
+              <h1 class="brand-name" style="font-size: 48px; margin-bottom: 16px;">Azure Sanctuary</h1>
+              <p style="font-size: 18px; margin-bottom: 32px; opacity: 0.9;">Clinical luxury meets intelligent care.</p>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px;">
+                <li>✓ HIPAA Compliant System</li>
+                <li>✓ Seamless Patient Integration</li>
+              </ul>
+            </div>
+            <div class="auth-right">
+              <h2 class="page-title mb-8">Welcome Back</h2>
+              <div class="role-tabs">
+                <div class="role-tab active" data-role="patient">Patient</div>
+                <div class="role-tab" data-role="doctor">Doctor</div>
+                <div class="role-tab" data-role="admin">Admin</div>
+              </div>
+              <form id="login-form">
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" id="login-email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Password</label>
+                  <input type="password" id="login-password" class="form-control" required>
+                </div>
+                <div id="login-error" class="text-danger mb-4 d-none">Invalid credentials</div>
+                <button type="submit" class="btn btn-primary w-full mb-4">Access Dashboard →</button>
+                <div class="flex justify-between items-center text-muted" style="font-size: 14px;">
+                  <a href="#" id="link-signup" class="patient-only">Create a clinical account</a>
+                  <a href="#" id="link-guest" class="patient-only">Continue as Guest</a>
+                </div>
+              </form>
+              <div class="emergency-card" id="link-emergency-guest" style="margin-top: 32px;" onclick="handleGuestLogin()">
+                <div>🚨</div>
+                <div>
+                  <div style="font-weight: 600;">Emergency Priority Access</div>
+                  <div style="font-size: 12px; opacity: 0.8;">Bypass login for critical care</div>
+                </div>
+              </div>
+              <div class="emergency-card" id="link-public-queue" style="margin-top: 16px; background: var(--primary-navy); border: none; color: white; justify-content: center;" onclick="navigate('public/queue')">
+                <div>📺</div>
+                <div style="font-weight: 600;">View Live Queue Display</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SIGNUP -->
+        <section id="view-signup">
+          <div class="auth-layout">
+            <div class="auth-right" style="width: 100%; padding: 48px 15%;">
+              <h2 class="page-title mb-4">Create Patient Account</h2>
+              <form id="signup-form">
+                <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+                  <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="reg-name" class="form-control" required></div>
+                  <div class="form-group"><label class="form-label">Email</label><input type="email" id="reg-email" class="form-control" required></div>
+                  <div class="form-group"><label class="form-label">Password</label><input type="password" id="reg-password" class="form-control" required></div>
+                  <div class="form-group"><label class="form-label">Phone</label><input type="text" id="reg-phone" class="form-control" required></div>
+                  <div class="form-group"><label class="form-label">Age</label><input type="number" id="reg-age" class="form-control" required></div>
+                  <div class="form-group">
+                    <label class="form-label">Blood Group</label>
+                    <select id="reg-blood" class="form-control" required>
+                      <option value="A+">A+</option><option value="A-">A-</option>
+                      <option value="B+">B+</option><option value="B-">B-</option>
+                      <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                      <option value="O+">O+</option><option value="O-">O-</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="signup-error" class="text-danger mb-4 d-none"></div>
+                <button type="submit" class="btn btn-primary w-full">Register & Access</button>
+                <div class="mt-4 text-center"><a href="#" onclick="navigate('login')">Back to Login</a></div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- PUBLIC QUEUE -->
+        <section id="view-public-queue">
+          <div class="flex justify-between items-center mb-8">
+            <div>
+              <h1 class="brand-font" style="font-size: 48px; color: var(--primary-navy);">Live Token Display</h1>
+              <p class="text-muted">Now Serving</p>
+            </div>
+            <button class="btn btn-secondary" onclick="navigate('login')">Back</button>
+          </div>
+          <div id="public-queue-grid" class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px;"></div>
+        </section>
+
+        <!-- PATIENT DASHBOARD -->
+        <section id="view-patient-dashboard">
+          <div class="card mb-8">
+            <h2 id="pd-welcome" class="brand-font" style="font-size: 24px;"></h2>
+            <p class="text-muted" id="pd-date"></p>
+          </div>
+          <div id="pd-active-token" class="card mb-8 d-none" style="border-left: 4px solid var(--accent-teal);"></div>
+          <div class="card-grid">
+            <div class="card" style="cursor:pointer;" onclick="navigate('patient/book')"><h3>📅 Book Appointment</h3></div>
+            <div class="card" style="cursor:pointer;" onclick="navigate('patient/queue')"><h3>👥 View Queue</h3></div>
+            <div class="card" style="cursor:pointer;" onclick="navigate('patient/records')"><h3>📂 My Records</h3></div>
+          </div>
+          <h3 class="mb-4" style="margin-top:32px;">My Appointments</h3>
+          <div class="table-container">
+            <table id="table-patient-appointments">
+              <thead><tr><th>Token</th><th>Doctor</th><th>Specialty</th><th>Date</th><th>Status</th><th>Fee</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- PATIENT BOOK -->
+        <section id="view-patient-book">
+          <div class="card">
+            <div class="step-indicator">
+              <div class="step active" id="step1-ind"><div class="step-circle">1</div>Doctor</div>
+              <div class="step" id="step2-ind"><div class="step-circle">2</div>Details</div>
+              <div class="step" id="step3-ind"><div class="step-circle">3</div>Confirm</div>
+            </div>
+            <div id="book-step-1">
+              <h3 class="mb-4">Select Specialty</h3>
+              <div id="specialty-filters" class="pill-selector"></div>
+              <div id="doctor-selection-grid" class="doctor-grid mb-4"></div>
+              <button class="btn btn-primary w-full" id="btn-next-2" disabled>Continue</button>
+            </div>
+            <div id="book-step-2" class="d-none">
+              <div class="form-group"><label class="form-label">Select Date</label><input type="date" id="book-date" class="form-control"></div>
+              <div class="form-group"><label class="form-label">Select Time</label><select id="book-time" class="form-control"></select></div>
+              <div class="form-group flex justify-between items-center p-4" style="background:#FFF5F5; border-radius:12px;">
+                <div>
+                  <label class="form-label" style="color:var(--danger-crimson); margin:0;">Is this an Emergency?</label>
+                  <small class="text-danger">Emergency cases are prioritized in queue</small>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="book-emergency"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="flex gap-4">
+                <button class="btn btn-secondary w-full" onclick="setBookingStep(1)">Back</button>
+                <button class="btn btn-primary w-full" id="btn-next-3" disabled>Review</button>
+              </div>
+            </div>
+            <div id="book-step-3" class="d-none">
+              <div id="book-summary" class="mb-8 p-4" style="background:var(--bg-soft-white); border-radius:12px;"></div>
+              <div class="flex gap-4">
+                <button class="btn btn-secondary w-full" onclick="setBookingStep(2)">Back</button>
+                <button class="btn btn-primary w-full" onclick="confirmBooking()">Confirm & Generate Token</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PATIENT QUEUE -->
+        <section id="view-patient-queue">
+          <div id="pq-serving" class="queue-now-serving d-none">
+            <h3>Now Serving</h3>
+            <div id="pq-serving-token" class="queue-token-large">--</div>
+            <div id="pq-serving-name" style="font-size:24px; opacity:0.9;">--</div>
+          </div>
+          <div class="table-container">
+            <table id="table-patient-queue">
+              <thead><tr><th>Position</th><th>Token</th><th>Patient</th><th>Type</th><th>Est. Wait</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- PATIENT RECORDS -->
+        <section id="view-patient-records">
+          <div class="card-grid" style="grid-template-columns: 1fr 2fr;">
+            <div class="card">
+              <h3 class="mb-4">My Profile</h3>
+              <div id="pr-profile"></div>
+            </div>
+            <div class="card">
+              <h3 class="mb-4">Medical Conditions</h3>
+              <div id="pr-conditions" style="display:flex; flex-direction:column; gap:12px;"></div>
+              <button class="btn btn-primary mt-4" onclick="savePatientConditions()">Save Conditions</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- DOCTOR DASHBOARD -->
+        <section id="view-doctor-dashboard">
+          <div class="card-grid">
+            <div class="card stats-card"><div class="text-muted">Queue Today</div><div id="dd-queue-count" class="stats-value">0</div></div>
+            <div class="card stats-card"><div class="text-muted">Completed</div><div id="dd-completed-count" class="stats-value">0</div></div>
+            <div class="card stats-card"><div class="text-muted">Fee (BDT)</div><div id="dd-fee" class="stats-value">0</div></div>
+            <div class="card stats-card flex items-center justify-center"><div id="dd-status-badge"></div></div>
+          </div>
+          <div class="flex justify-between items-center mb-4">
+            <h3>Today's Queue</h3>
+            <div class="flex gap-4">
+              <button class="btn btn-secondary" onclick="navigate('public/queue')">📺 Launch Public Display</button>
+              <button class="btn btn-primary" onclick="navigate('doctor/queue')">Open Full Queue View</button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table id="table-doctor-queue">
+              <thead><tr><th>Pos</th><th>Token</th><th>Patient</th><th>Type</th><th>Arrived</th><th>Action</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- DOCTOR QUEUE -->
+        <section id="view-doctor-queue">
+          <div id="dq-serving" class="queue-now-serving">
+            <h3>Now Serving</h3>
+            <div id="dq-serving-token" class="queue-token-large">--</div>
+            <div id="dq-serving-name" style="font-size:24px; opacity:0.9;">--</div>
+            <button class="btn btn-danger mt-4" onclick="callNextPatient()">Call Next Patient</button>
+          </div>
+          <div class="table-container">
+            <table id="table-doctor-full-queue">
+              <thead><tr><th>Pos</th><th>Token</th><th>Patient</th><th>Type</th><th>Arrived</th><th>Action</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- DOCTOR SETTINGS -->
+        <section id="view-doctor-settings">
+          <div class="card" style="max-width: 600px;">
+            <h3 class="mb-4">Practice Settings</h3>
+            <form id="form-doc-settings">
+              <div class="form-group"><label class="form-label">Consultation Fee (BDT)</label><input type="number" id="ds-fee" class="form-control"></div>
+              <div class="form-group"><label class="form-label">Current Status</label>
+                <select id="ds-status" class="form-control">
+                  <option value="Available">Available</option>
+                  <option value="In Session">In Session</option>
+                  <option value="Off Duty">Off Duty</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Working Hours</label>
+                <div class="flex gap-4"><input type="time" id="ds-start" class="form-control"><input type="time" id="ds-end" class="form-control"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Working Days</label>
+                <div id="ds-days" class="pill-selector"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Bio</label><textarea id="ds-bio" class="form-control" rows="3"></textarea></div>
+              <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ADMIN DASHBOARD -->
+        <section id="view-admin-dashboard">
+          <div class="card-grid">
+            <div class="card stats-card"><div class="text-muted">Total Doctors</div><div id="ad-doc-count" class="stats-value">0</div></div>
+            <div class="card stats-card"><div class="text-muted">Total Patients</div><div id="ad-pat-count" class="stats-value">0</div></div>
+            <div class="card stats-card"><div class="text-muted">Active Queue</div><div id="ad-queue-count" class="stats-value">0</div></div>
+            <div class="card stats-card"><div class="text-muted">Efficiency</div><div id="ad-eff" class="stats-value">0%</div></div>
+          </div>
+          <div class="card-grid" style="grid-template-columns: 2fr 1fr;">
+            <div>
+              <h3 class="mb-4">Doctor Directory</h3>
+              <div class="table-container">
+                <table id="table-admin-doctors-mini">
+                  <thead><tr><th>Practitioner</th><th>Specialty</th><th>Status</th><th>Tokens</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:24px;">
+              <div class="card" style="background:var(--primary-navy); color:white;">
+                <h3 class="brand-font mb-4">Clinic Pulse</h3>
+                <div id="ad-pulse" class="badge" style="font-size:16px; padding:8px 16px;"></div>
+              </div>
+              <div id="ad-alerts"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ADMIN DOCTORS -->
+        <section id="view-admin-doctors">
+          <div class="flex justify-between items-center mb-4">
+            <h3>Manage Doctors</h3>
+            <button class="btn btn-primary" onclick="openAddDoctorModal()">+ Add Doctor</button>
+          </div>
+          <div class="table-container">
+            <table id="table-admin-doctors-full">
+              <thead><tr><th>Name</th><th>Specialty</th><th>Status</th><th>Fee</th><th>Hours</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ADMIN PATIENTS -->
+        <section id="view-admin-patients">
+          <h3 class="mb-4">Patient History</h3>
+          <div class="table-container">
+            <table id="table-admin-patients">
+              <thead><tr><th>Name</th><th>Phone</th><th>Blood Group</th><th>Conditions</th><th>Appointments</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ADMIN TOKENS -->
+        <section id="view-admin-tokens">
+          <div class="card-grid" style="grid-template-columns: 1fr 2fr;">
+            <div class="card">
+              <h3 class="mb-4">Token Rules Configuration</h3>
+              <form id="form-token-rules">
+                <div class="form-group">
+                  <label class="form-label">Wait Time Buffer (min)</label>
+                  <input type="range" id="tr-buffer" min="5" max="60" class="w-full">
+                  <div id="tr-buffer-val" class="text-center">15 min</div>
+                </div>
+                <div class="form-group"><label class="form-label">Penalty Duration</label>
+                  <select id="tr-penalty" class="form-control">
+                    <option value="0.5">30 min</option><option value="1">1 hour</option>
+                    <option value="2">2 hours</option><option value="4">4 hours</option>
+                  </select>
+                </div>
+                <div class="form-group flex justify-between">
+                  <label class="form-label">Smart Re-Queue</label>
+                  <label class="toggle-switch"><input type="checkbox" id="tr-smart"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="form-group"><label class="form-label">Expiry (Hours)</label><input type="number" id="tr-expiry" class="form-control"></div>
+                <div class="form-group"><label class="form-label">Max Daily Tokens / Doctor</label><input type="number" id="tr-max" class="form-control"></div>
+                <button type="submit" class="btn btn-primary w-full">Update Protocol</button>
+              </form>
+            </div>
+            <div>
+              <h3 class="mb-4">Token Activity Log</h3>
+              <div class="table-container">
+                <table id="table-admin-token-log">
+                  <thead><tr><th>Token ID</th><th>Patient</th><th>Doctor</th><th>Generated</th><th>Status</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+  <script src="assets/app.js"></script>
+</body>
+</html>
